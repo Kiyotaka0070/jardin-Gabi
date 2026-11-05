@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Un Jardín Mágico para Gabi</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root { --glass-bg: rgba(28, 12, 32, 0.68); --glass-border: rgba(255, 255, 255, 0.22); --text-main: #fff0f5; --text-sub: #e8c7dd; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{width:100%;height:100%;overflow-x:hidden}
+body{ min-height:100vh; color:var(--text-main); font-family:"Plus Jakarta Sans",sans-serif; background:#160a1e; background-image: radial-gradient(circle at 50% 0%, #3a1a4d 0%, #160a1e 80%); }
+body.modo-nocturno { background-image: radial-gradient(circle at 50% 0%, #1a0b2e 0%, #05030a 85%); }
+#pantallaInicio { position:fixed;inset:0;z-index:100; display:flex;align-items:center;justify-content:center; background: radial-gradient(circle at 50% 30%, #3a1a4d 0%, #160a1e 90%); transition:opacity 0.8s ease, visibility 0.8s; padding:20px; }
+#pantallaInicio.oculta { opacity:0; visibility:hidden; pointer-events:none; }
+.contenido-inicio { text-align:center; max-width:440px; background: rgba(28, 12, 32, 0.85); border:1px solid rgba(255,255,255,0.25); padding:36px 28px; border-radius:32px; backdrop-filter:blur(20px); box-shadow:0 20px 50px rgba(0,0,0,0.6); animation: floatStart 4s ease-in-out infinite; }
+@keyframes floatStart { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.icono-inicio { font-size:64px; margin-bottom:12px; display:inline-block; filter:drop-shadow(0 0 18px rgba(255,93,143,0.8)); animation: pulseIcon 2s infinite ease-in-out; }
+@keyframes pulseIcon { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+.btn-entrar { margin-top:24px; padding:16px 44px; border-radius:999px; border:1px solid rgba(255,255,255,0.4); background:linear-gradient(135deg, #ff5d8f, #ff8fab 50%, #9b5de5); color:#fff; font-size:13px; font-weight:700; letter-spacing:2px; cursor:pointer; box-shadow:0 8px 30px rgba(255,93,143,0.4); }
+.btn-entrar:active { transform:scale(0.96); }
+.btn-sembrar { margin-top:16px; padding:14px 28px; border-radius:999px; border:1px solid rgba(255,255,255,0.4); background:white; color:#7b2cbf; font-size:13px; font-weight:700; letter-spacing:1px; cursor:pointer; }
+#efectos { position:fixed;inset:0;pointer-events:none;z-index:15;overflow:hidden }
+.particula { position:absolute; top:-40px; left:var(--left); font-size:var(--size); opacity:0; animation:fallParticle var(--duration) linear forwards; }
+@keyframes fallParticle { 0%{transform:translateY(0) rotate(0deg);opacity:0} 15%{opacity:0.85} 85%{opacity:0.85} 100%{transform:translateY(105vh) rotate(360deg);opacity:0} }
+.encabezado { padding:42px 20px 18px; text-align:center }
+h1 { font:600 clamp(2.4rem, 6vw, 4rem) "Cormorant Garamond", serif; }
+h1 span { background: linear-gradient(135deg, #ff8fab, #c77dff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.sub-header { color:var(--text-sub); font-size:14px; margin-top:6px; }
+main { width:min(900px, 92%); margin:auto; padding-bottom:40px }
+.panel { position:relative; margin-bottom:24px; padding:26px 22px; border:1px solid var(--glass-border); border-radius:28px; background:var(--glass-bg); backdrop-filter:blur(24px); box-shadow:0 16px 40px rgba(0,0,0,0.35); text-align:center; }
+.jardin-seccion { position:relative; overflow:hidden; margin-bottom:26px; border:1px solid rgba(255,255,255,0.3); border-radius:32px; height:380px; box-shadow:0 20px 50px rgba(0,0,0,0.5); cursor:pointer; background:#2a1230; }
+#canvasJardin { width:100%; height:100%; display:block }
+.centro-jardin { position:absolute; top:50%; left:50%; transform:translate(-50%, -58%); text-align:center; pointer-events:none; z-index:5; }
+.centro-jardin .personajes { font-size:64px; line-height:1; filter:drop-shadow(0 10px 20px rgba(0,0,0,0.5)); animation: floatStart 3.5s ease-in-out infinite; }
+.centro-jardin .nombre-centro { margin-top:10px; background:rgba(22,10,30,0.75); border:1px solid rgba(255,255,255,0.3); padding:8px 18px; border-radius:99px; font-size:13px; font-weight:700; letter-spacing:1px; backdrop-filter:blur(8px); }
+.jardin-overlay-tag { position:absolute; bottom:16px; left:50%; transform:translateX(-50%); background:rgba(22, 10, 30, 0.85); padding:10px 24px; border-radius:99px; border:1px solid rgba(255,255,255,0.3); font-size:13px; color:#ffe0ec; font-weight:600; backdrop-filter:blur(12px); pointer-events:none; white-space:nowrap; }
+.modal { display:none; position:fixed; inset:0; z-index:90; padding:20px; overflow-y:auto; align-items:center; justify-content:center; background:rgba(10, 5, 16, 0.88); backdrop-filter:blur(16px); }
+.modal.visible { display:flex; animation:fadeIn 0.3s ease-out }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.carta { position:relative; width:min(520px, 100%); padding:32px 26px; border:1px solid rgba(255,93,143,0.4); border-radius:28px; background:linear-gradient(150deg, #2e153e 0%, #160a1e 100%); text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.6); }
+.cerrar { position:absolute; top:12px; right:18px; border:none; background:transparent; color:var(--text-sub); font-size:2rem; cursor:pointer; }
+.texto-carta { color:#ffe8f0; line-height:1.8; text-align:left; white-space:pre-line; font-size:14.5px; margin:18px 0; max-height:55vh; overflow-y:auto; padding-right:8px; }
+#panoramaJardin { position:fixed; inset:0; z-index:80; display:none; background:#0d0612; flex-direction:column; }
+#panoramaJardin.visible { display:flex; animation:fadeIn 0.4s }
+.panorama-top { height:54px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; background:linear-gradient(180deg, rgba(13,6,18,0.85), transparent); z-index:30; position:absolute; top:0; left:0; right:0; }
+.panorama-viewport { flex:1; overflow:hidden; position:relative; touch-action:pan-y; cursor:grab; }
+.panorama-track { display:flex; width:200%; height:100%; transition:transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94); }
+.escena-wrap { width:50%; height:100%; position:relative; flex-shrink:0; overflow:hidden; background-size:cover; background-position:center; }
+/* 🤍 MUNDO 1 NUEVO - JAZMINES */
+.escena-1 { background-image: linear-gradient(rgba(255,93,143,0.22), rgba(155,93,229,0.35)), url('https://images.unsplash.com/photo-1522748906645-95d8adfd52c7?auto=format&fit=crop&w=2000&q=85'); }
+/* ⭐ MUNDO 2 - Noche estrellada morada */
+.escena-2 { background-image:url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&w=2000&q=85'); }
+.escena-titulo { position:absolute; top:70px; left:50%; transform:translateX(-50%); background:rgba(22,10,30,0.80); border:1px solid rgba(255,255,255,0.35); padding:11px 22px; border-radius:99px; font-size:13px; font-weight:700; z-index:20; backdrop-filter:blur(8px); white-space:nowrap; box-shadow:0 8px 24px rgba(0,0,0,0.4); }
+.sun-rays { position:absolute; inset:0; pointer-events:none; z-index:2; background: radial-gradient(circle at 80% 20%, rgba(255,180,210,0.35) 0%, transparent 65%); }
+.vida-layer { position:absolute; inset:0; z-index:10; pointer-events:none; }
+.animal-animado { position:absolute; z-index:12; font-size:32px; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
+@keyframes flyButterfly1 { 0%{ transform: translate(-40px, 50vh) scale(0.8) rotate(-10deg); } 50%{ transform: translate(45vw, 15vh) scale(1.1) rotate(15deg); } 100%{ transform: translate(105vw, 40vh) scale(0.9) rotate(-5deg); } }
+@keyframes flyBee1 { 0%{ transform: translate(10vw, 60vh) scale(0.9); } 50%{ transform: translate(60vw, 25vh) scale(1.1); } 100%{ transform: translate(95vw, 55vh) scale(0.9); } }
+@keyframes fireflyFloat { 0%{ transform: translate(20vw, 70vh) scale(0.7); opacity: 0.2; } 50%{ transform: translate(50vw, 30vh) scale(1.2); opacity: 1; } 100%{ transform: translate(80vw, 65vh) scale(0.8); opacity: 0.2; } }
+.zona-limpia { position:absolute; z-index:22; background: transparent; border: none; cursor: pointer; }
+.zona-limpia.flash { animation:flashAnim 0.6s ease-out }
+@keyframes flashAnim { 0%{ background:rgba(255,93,143,0.45); box-shadow:0 0 24px #ff5d8f } 100%{ background:transparent } }
+.flecha-pc { position:absolute; top:50%; transform:translateY(-50%); z-index:35; width:48px; height:48px; border-radius:50%; background:rgba(22,10,30,0.75); border:1px solid rgba(255,255,255,0.4); color:#fff; font-size:28px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.flecha-pc.izq { left:12px } .flecha-pc.der { right:12px }
+#ramoBar { position:absolute; bottom:56px; left:50%; transform:translateX(-50%) translateY(90px); background:rgba(28,12,32,0.95); border:1px solid rgba(255,93,143,0.4); border-radius:30px; padding:10px 20px; display:flex; align-items:center; gap:14px; z-index:35; transition:transform 0.4s; backdrop-filter:blur(16px); opacity:0; pointer-events:none; }
+#ramoBar.visible { transform:translateX(-50%) translateY(0); opacity:1; pointer-events:auto }
+.indicadores { position:absolute; bottom:18px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:35; }
+.dot { width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,0.4); cursor:pointer; padding:4px; background-clip:content-box; }
+.dot.activo { background:#ff5d8f; width:26px; border-radius:12px }
+.music-control { position:fixed; bottom:20px; right:20px; z-index:40; width:46px; height:46px; border-radius:50%; border:1px solid rgba(255,255,255,0.25); background:rgba(28,12,32,0.85); color:#ff8fab; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.chip { font-size:11px; padding:6px 12px; border-radius:999px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); }
+.nota-dia { background:rgba(255,255,255,0.08); border:1px solid rgba(255,143,171,0.4); border-radius:20px; padding:16px; margin-top:14px; text-align:left; line-height:1.7; font-size:13.5px; }
+</style>
+</head>
+<body>
+
+<audio id="musicaFondo" loop preload="auto"><source src="cancion-gabi.mp3" type="audio/mpeg"></audio>
+<button id="btnMusica" class="music-control">🎵</button>
+
+<div id="pantallaInicio">
+  <div class="contenido-inicio">
+    <div class="icono-inicio">🤍</div>
+    <h1 style="font:600 2.5rem 'Cormorant Garamond',serif">Para <span style="color:#ff8fab">Gabi</span></h1>
+    <p style="margin-top:8px;color:var(--text-sub);font-size:14px">Un jardín de jazmines, rosa y morado, solo para ti. Con gatitos y mucha paz.</p>
+    <button class="btn-entrar" id="btnEntrar">Entrar a mi jardín 🤍</button>
+  </div>
+</div>
+
+<div id="efectos"></div>
+
+<header class="encabezado">
+  <h1>El Jardín de <span>Gabi</span></h1>
+  <p class="sub-header" id="fechaHoy"></p>
+  <p class="sub-header" id="florDelDia" style="color:#ff8fab;font-weight:700;margin-top:4px"></p>
+</header>
+
+<main>
+  <section class="panel">
+    <div style="font-size:22px;letter-spacing:6px;margin-bottom:10px">🤍 🌸 💜 🐱 🌅 🎧 ⭐ 🦋 ✨</div>
+    <h2 style="font:600 1.5rem 'Cormorant Garamond',serif">Nota de hoy</h2>
+    <div id="notaHoyBox" class="nota-dia"></div>
+    <p style="font-size:13px;color:var(--text-sub);margin-top:14px">Cada flor es un detallito diferente. No hay orden, no hay prisa.</p>
+    <div id="listaFlores" style="margin-top:14px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center"></div>
+    <button id="btnSembrar" class="btn-sembrar">🤍 Sembrar un jazmín para mí</button>
+    <p id="textoSembradas" style="font-size:12px;color:var(--text-sub);margin-top:10px">Has sembrado 0 jazmines 🤍</p>
+  </section>
+
+  <section class="jardin-seccion" id="jardinSeccion">
+    <canvas id="canvasJardin"></canvas>
+    <div class="centro-jardin"><div class="personajes">🐱🤍</div><div class="nombre-centro">Gary te cuida 💜</div></div>
+    <div class="jardin-overlay-tag"><span>✨ Toca aquí para ver los 2 mundos</span></div>
+  </section>
+
+  <section class="panel" style="padding:28px">
+    <div style="font-size:2.2rem;margin-bottom:6px">📜</div>
+    <h2 style="font:600 1.4rem 'Cormorant Garamond',serif">Carta final</h2>
+    <p style="font-size:13px;color:var(--text-sub);margin-bottom:16px">Esta no cambia, es para siempre.</p>
+    <button id="abrirCarta" class="btn-entrar" style="margin-top:0;padding:12px 32px">LEER CARTA FINAL ✨</button>
+  </section>
+</main>
+
+<div id="modalCarta" class="modal"><article class="carta"><button id="cerrarCarta" class="cerrar">×</button><div style="font-size:2.2rem">🤍</div><h2 style="color:#ff8fab;font-family:'Cormorant Garamond',serif;font-size:1.6rem">Para Gabi</h2><div id="textoCarta" class="texto-carta"></div><button id="finalizarCarta" class="btn-entrar" style="padding:10px 28px">Cerrar 💜</button></article></div>
+<div id="modalRecuerdo" class="modal"><article class="carta"><button id="cerrarRecuerdo" class="cerrar">×</button><div id="recuerdoIcono" style="font-size:2.8rem">🤍</div><div id="recuerdoNombre" style="font-size:11px;letter-spacing:2px;color:#ff8fab;margin-top:6px"></div><div id="recuerdoTexto" class="texto-carta"></div><button id="btnCerrarRecuerdo2" class="btn-entrar" style="padding:10px 28px">Cerrar 💜</button></article></div>
+
+<div id="panoramaJardin">
+  <div class="panorama-top"><button id="btnLimpiarRamo" style="display:none;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:white;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:11px">🗑️ Limpiar selección</button><button id="cerrarPanorama" style="background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.3);color:white;width:38px;height:38px;border-radius:50%;cursor:pointer;margin-left:auto">✕</button></div>
+  <div class="panorama-viewport" id="viewport"><div class="panorama-track" id="track">
+      <div class="escena-wrap escena-1"><div class="sun-rays"></div><div class="escena-titulo">🤍 Mundo 1 - Jardín de Jazmines</div><div class="vida-layer" id="vida1"></div><div class="zona-limpia" style="left:8%; top:22%; width:26%; height:32%;" data-flor="0"></div><div class="zona-limpia" style="left:40%; top:24%; width:24%; height:28%;" data-flor="1"></div><div class="zona-limpia" style="left:68%; top:20%; width:25%; height:35%;" data-flor="2"></div><div class="zona-limpia" style="left:12%; bottom:12%; width:32%; height:32%;" data-flor="3"></div><div class="zona-limpia" style="left:52%; bottom:12%; width:36%; height:32%;" data-flor="4"></div></div>
+      <div class="escena-wrap escena-2"><div class="sun-rays"></div><div class="escena-titulo">⭐ Mundo 2 - Noche de Estrellas Morada</div><div class="vida-layer" id="vida2"></div><div class="zona-limpia" style="left:10%; top:22%; width:36%; height:30%;" data-flor="5"></div><div class="zona-limpia" style="left:55%; top:22%; width:36%; height:30%;" data-flor="6"></div><div class="zona-limpia" style="left:12%; bottom:14%; width:36%; height:32%;" data-flor="7"></div><div class="zona-limpia" style="left:52%; bottom:14%; width:36%; height:32%;" data-flor="8"></div></div>
+    </div>
+    <button class="flecha-pc izq" id="flechaIzq">‹</button><button class="flecha-pc der" id="flechaDer">›</button>
+    <div id="ramoBar"><span id="ramoTexto">🤍 0 seleccionados</span><button id="btnVerRamo" style="background:linear-gradient(100deg,#ff5d8f,#9b5de5);border:none;color:white;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:11px;font-weight:600">Ver detalles 🤍</button></div>
+    <div class="indicadores"><div class="dot activo"></div><div class="dot"></div></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const NOMBRE_CANCION = "cancion-gabi.mp3";
+const jardinSeccion = document.getElementById("jardinSeccion");
+const pantallaInicio = document.getElementById("pantallaInicio");
+const btnEntrar = document.getElementById("btnEntrar");
+const efectos = document.getElementById("efectos");
+const musica = document.getElementById("musicaFondo");
+const btnMusica = document.getElementById("btnMusica");
+const panoramaJardin = document.getElementById("panoramaJardin");
+const track = document.getElementById("track");
+const viewport = document.getElementById("viewport");
+const horaActual = new Date().getHours();
+const esNoche = (horaActual >= 18 || horaActual < 6);
+if (esNoche) document.body.classList.add("modo-nocturno");
+const SIMBOLOS = esNoche ? ["🌙","⭐","💜","✨","🐱","🤍","🦋"] : ["🤍","🌸","💜","✨","🐱","🌷","🦋"];
+
+const FLORES_INFO = [
+  { nombre:"Gary & Gatitos", emoji:"🐱", desc:"Los que te dan paz", mensaje:"Para ti, que amas a los gatitos y a Gary. Tu ternura con ellos dice mucho de tu corazón." },
+  { nombre:"Sailor Moon", emoji:"🌙", desc:"Tu favorita", mensaje:"La nena de los chonguitos, tu favorita. Porque eres de las que cuidan y brillan sin hacer ruido." },
+  { nombre:"Café + Selva Negra", emoji:"☕", desc:"Tu momento sola", mensaje:"Para tus salidas sola a tomar café y comer selva negra. Estar sola no es estar triste, es tu forma de recargar." },
+  { nombre:"Helado Sola", emoji:"🍦", desc:"Tu terapia", mensaje:"Tus cenas de helado sola, tus caminatas de 2-3 horas con audífonos. Tu paz, nadie te apura aquí." },
+  { nombre:"Fuerza Tranquila", emoji:"🌷", desc:"Tu forma de ser", mensaje:"Eres terca con tus principios y no te gusta depender de nadie. Eso no es ser fría, es ser fuerte." },
+  { nombre:"Jazmines", emoji:"🤍", desc:"Delicados como tú", mensaje:"Los jazmines son chiquitos, blancos y huelen rico sin hacer ruido. Como tú, que brillas sin presumir." },
+  { nombre:"Música y Calma", emoji:"🎧", desc:"Tu momento de paz", mensaje:"Ponte tus audífonos, pon tu canción favorita y camina sin apuro. Tu calma es lo primero." },
+  { nombre:"Un Deseo", emoji:"⭐", desc:"Pide lo que quieras", mensaje:"Si ves una estrella, pide un deseo. Que sea algo bonito solo para ti, sin que nadie lo sepa." },
+  { nombre:"Mariposa Libre", emoji:"🦋", desc:"Libre y a tu ritmo", mensaje:"Como una mariposa, no tienes que quedarte en un solo lugar. Vuela a tu ritmo, sin que nadie te apure." }
+];
+
+const NOTAS_DIARIAS = [
+  "Hoy no tienes que ser fuerte. Si estás cansada, descansa. Tu jardín de jazmines te espera sin apuro.",
+  "Que tu café de hoy esté rico y tu día tranquilo. Te mereces un rato sin ruido.",
+  "Eres de las que cuidan en silencio. Hoy alguien te recuerda con cariño: tú.",
+  "No compares tu ritmo con el de nadie. Tú vas a tu paso y vas bien.",
+  "Si hoy toca trabajar muchas horas, que el día pase rápido y llegues a casa con paz.",
+  "Gary seguro te extraña. Dale un abrazo de mi parte cuando lo veas.",
+  "Hoy es buen día para un helado sola, sin culpa. Te lo mereces.",
+  "Tu proyecto avanza, aunque no se note cada día. Sigue, vas bien.",
+  "No tienes que responderle a todo el mundo hoy. Tu paz primero.",
+  "Eres valiente aunque no lo sientas. Cada día que sigues, lo demuestras.",
+  "Que hoy algo chiquito te saque una sonrisa. Tú eres tu lugar seguro.",
+  "Si te sientes sola, abre este jardín. Aquí hay un lugar solo para ti.",
+  "Tu humor negro es parte de tu encanto. No lo cambies por nadie.",
+  "Hoy respira hondo antes de empezar. Un paso a la vez, sin correr.",
+  "Eres disciplinada y eso pocos lo entienden. Sigue con lo tuyo.",
+  "Que hoy te salga algo bonito sin que lo esperes. Te lo mereces.",
+  "No eres fría, eres selectiva. Y eso está bien. Tu círculo pequeño es valioso.",
+  "Hoy date un gusto: café, selva negra, o tu caminata con audífonos.",
+  "Si hoy estás triste, no te obligues a sonreír. Solo respira, mañana será otro día.",
+  "Tu fuerza tranquila inspira, aunque tú no lo veas así.",
+  "Hoy piensa en una cosa que hiciste bien esta semana. Hay muchas.",
+  "No tienes que tener todo resuelto hoy. Tu jardín crece poco a poco, como tú.",
+  "Que hoy nadie te quite tu paz. Tú decides a quién dejas entrar.",
+  "Eres buena cuidando a los demás. Hoy cuídate tú un poquito también.",
+  "Si hoy toca ahorrar para tus metas, recuerda por qué lo haces: por ti y por los tuyos.",
+  "Hoy escucha esa canción que te gusta y camina un rato. Tu terapia.",
+  "Eres de las que no se rinden fácil. Eso ya te hace especial.",
+  "Hoy sonríe por algo chiquito: un gatito, un café, un jazmín.",
+  "No estás sola aunque a veces lo parezca. Aquí hay alguien que te aprecia.",
+  "Cierra el día con calma. Mañana tu jardín tendrá otra nota nueva para ti."
+];
+
+function getDiaDelAnio(){ const hoy = new Date(); const inicio = new Date(hoy.getFullYear(),0,0); return Math.floor((hoy - inicio) / (1000*60*60*24)); }
+function getNotaHoy(){ const idx = getDiaDelAnio() % NOTAS_DIARIAS.length; return NOTAS_DIARIAS[idx]; }
+function getFlorHoy(){ const idx = getDiaDelAnio() % FLORES_INFO.length; return FLORES_INFO[idx]; }
+function mostrarNotaHoy(){ const hoy = new Date(); document.getElementById("fechaHoy").textContent = hoy.toLocaleDateString("es-PE", { weekday:"long", day:"numeric", month:"long" }); const flor = getFlorHoy(); document.getElementById("florDelDia").textContent = `🤍 Hoy te toca: ${flor.emoji} ${flor.nombre}`; document.getElementById("notaHoyBox").innerHTML = `<b>💌 ${flor.emoji} Nota del día</b><br>${getNotaHoy()}`; }
+function getCartaFinal(){ return `Hola Gabi 🤍\n\nTe hice este jardín de jazmines para que entres cuando quieras distraerte.\n\nNo es una promesa complicada, es solo un lugar bonito que es tuyo.\n\nToca las flores, siembra un jazmín cuando quieras, y si un día no quieres entrar, también está bien.\n\nGracias por dejarme hacerte este detalle.\n\nCon cariño,\nTonycito 🤍`; }
+function actualizarChips(){ const lista = document.getElementById("listaFlores"); if(!lista) return; lista.innerHTML=""; FLORES_INFO.forEach(f=>{ const chip=document.createElement("span"); chip.className="chip"; chip.textContent=f.emoji+" "+f.nombre; lista.appendChild(chip); }); }
+
+const canvasJardin = document.getElementById("canvasJardin");
+const ctxJardin = canvasJardin.getContext("2d");
+function resizeMainCanvas(){ const rect=jardinSeccion.getBoundingClientRect(); canvasJardin.width=rect.width*window.devicePixelRatio||rect.width; canvasJardin.height=rect.height*window.devicePixelRatio||rect.height; }
+window.addEventListener("resize", resizeMainCanvas); resizeMainCanvas();
+let windTime=0; const mainPetals=[];
+for(let i=0;i<36;i++){ mainPetals.push({x:Math.random()*1000,y:Math.random()*400,r:3+Math.random()*5,speedY:0.8+Math.random()*1.2,speedX:0.5+Math.random()*1,angle:Math.random()*Math.PI*2}); }
+function drawMainGardenScene(){
+  const w=canvasJardin.width, h=canvasJardin.height; windTime+=0.02; ctxJardin.clearRect(0,0,w,h);
+  const skyGrad=ctxJardin.createLinearGradient(0,0,0,h*0.65);
+  if(esNoche){ skyGrad.addColorStop(0,"#1a0b2e"); skyGrad.addColorStop(0.5,"#3a1a5a"); skyGrad.addColorStop(1,"#5a2a6e"); } else { skyGrad.addColorStop(0,"#2a1230"); skyGrad.addColorStop(0.5,"#5a2a6e"); skyGrad.addColorStop(1,"#ff8fab"); }
+  ctxJardin.fillStyle=skyGrad; ctxJardin.fillRect(0,0,w,h);
+  if(esNoche){ ctxJardin.fillStyle="white"; for(let s=0;s<30;s++){ const sx=(Math.sin(s*47)*0.5+0.5)*w; const sy=(Math.sin(s*91)*0.5+0.5)*h*0.4; ctxJardin.globalAlpha=0.4+Math.sin(windTime*2+s)*0.3; ctxJardin.beginPath(); ctxJardin.arc(sx,sy,1.5,0,Math.PI*2); ctxJardin.fill(); } ctxJardin.globalAlpha=1; }
+  const sunX=w*0.82, sunY=h*0.22; const sunGlow=ctxJardin.createRadialGradient(sunX,sunY,5,sunX,sunY,90);
+  if(esNoche){ sunGlow.addColorStop(0,"rgba(255,255,255,0.95)"); sunGlow.addColorStop(0.35,"rgba(200,180,255,0.4)"); sunGlow.addColorStop(1,"rgba(200,180,255,0)"); } else { sunGlow.addColorStop(0,"rgba(255,240,245,0.95)"); sunGlow.addColorStop(0.35,"rgba(255,93,143,0.5)"); sunGlow.addColorStop(1,"rgba(255,93,143,0)"); }
+  ctxJardin.fillStyle=sunGlow; ctxJardin.beginPath(); ctxJardin.arc(sunX,sunY,90,0,Math.PI*2); ctxJardin.fill();
+  ctxJardin.fillStyle="#3a1a4d"; ctxJardin.beginPath(); ctxJardin.moveTo(0,h*0.62); ctxJardin.quadraticCurveTo(w*0.3,h*0.5,w*0.6,h*0.6); ctxJardin.quadraticCurveTo(w*0.8,h*0.68,w,h*0.56); ctxJardin.lineTo(w,h); ctxJardin.lineTo(0,h); ctxJardin.fill();
+  ctxJardin.fillStyle="#4a235a"; ctxJardin.beginPath(); ctxJardin.moveTo(0,h*0.66); ctxJardin.quadraticCurveTo(w*0.35,h*0.56,w*0.72,h*0.66); ctxJardin.quadraticCurveTo(w*0.88,h*0.7,w,h*0.62); ctxJardin.lineTo(w,h); ctxJardin.lineTo(0,h); ctxJardin.fill();
+  const grassGrad=ctxJardin.createLinearGradient(0,h*0.65,0,h); grassGrad.addColorStop(0,"#7b2cbf"); grassGrad.addColorStop(1,"#2a1230");
+  ctxJardin.fillStyle=grassGrad; ctxJardin.beginPath(); ctxJardin.moveTo(0,h*0.68); ctxJardin.quadraticCurveTo(w*0.5,h*0.64,w,h*0.7); ctxJardin.lineTo(w,h); ctxJardin.lineTo(0,h); ctxJardin.fill();
+  ctxJardin.strokeStyle="#ff8fab"; ctxJardin.lineWidth=2.5; const numBlades=Math.floor(w/12);
+  for(let i=0;i<numBlades;i++){ const gx=i*13; const gy=h*0.7+(Math.sin(i*88)*18); const bladeHeight=28+Math.sin(i*14)*14; const sway=Math.sin(windTime+i*0.3)*14; ctxJardin.beginPath(); ctxJardin.moveTo(gx,gy); ctxJardin.quadraticCurveTo(gx+sway*0.5,gy-bladeHeight*0.6,gx+sway,gy-bladeHeight); ctxJardin.stroke(); }
+  const numElementos=21;
+  for(let i=0;i<numElementos;i++){ const fx=(w*0.04)+(i*(w*0.92/numElementos)); const fy=h*0.72+Math.sin(i*28)*35; const sway=Math.sin(windTime+i*0.6)*8; const tipo=i%7; const tipX=fx+sway; const tipY=fy;
+    if(tipo===0){ ctxJardin.strokeStyle="#2e7d32"; ctxJardin.lineWidth=3; ctxJardin.beginPath(); ctxJardin.moveTo(fx,fy+45); ctxJardin.lineTo(tipX,tipY); ctxJardin.stroke(); ctxJardin.fillStyle=i%2===0?"#ff4d6d":"#ff8fab"; ctxJardin.beginPath(); ctxJardin.moveTo(tipX-8,tipY+12); ctxJardin.bezierCurveTo(tipX-12,tipY-8,tipX-2,tipY-14,tipX,tipY-16); ctxJardin.bezierCurveTo(tipX+2,tipY-14,tipX+12,tipY-8,tipX+8,tipY+12); ctxJardin.closePath(); ctxJardin.fill(); }
+    else if(tipo===1){ ctxJardin.strokeStyle="#2e7d32"; ctxJardin.lineWidth=3; ctxJardin.beginPath(); ctxJardin.moveTo(fx,fy+45); ctxJardin.lineTo(tipX,tipY); ctxJardin.stroke(); ctxJardin.fillStyle="#ffffff"; for(let p=0;p<6;p++){ const ang=p*(Math.PI/3)+windTime*0.1; ctxJardin.beginPath(); ctxJardin.arc(tipX+Math.cos(ang)*8,tipY+Math.sin(ang)*8,5.5,0,Math.PI*2); ctxJardin.fill(); } ctxJardin.fillStyle="#ffb703"; ctxJardin.beginPath(); ctxJardin.arc(tipX,tipY,4,0,Math.PI*2); ctxJardin.fill(); }
+    else if(tipo===2){ ctxJardin.strokeStyle="#5c4033"; ctxJardin.lineWidth=3.5; ctxJardin.beginPath(); ctxJardin.moveTo(fx,fy+45); ctxJardin.lineTo(tipX,tipY-5); ctxJardin.stroke(); ctxJardin.fillStyle="#c77dff"; for(let p=0;p<5;p++){ const pAngle=(p*Math.PI*2/5); ctxJardin.beginPath(); ctxJardin.arc(tipX+Math.cos(pAngle)*9,(tipY-5)+Math.sin(pAngle)*9,6,0,Math.PI*2); ctxJardin.fill(); } ctxJardin.fillStyle="#fff"; ctxJardin.beginPath(); ctxJardin.arc(tipX,tipY-5,3.5,0,Math.PI*2); ctxJardin.fill(); }
+    else if(tipo===3){ ctxJardin.fillStyle="#4a235a"; ctxJardin.beginPath(); ctxJardin.moveTo(tipX,tipY-20); ctxJardin.lineTo(tipX-12,tipY+10); ctxJardin.lineTo(tipX+12,tipY+10); ctxJardin.closePath(); ctxJardin.fill(); ctxJardin.fillStyle="#7b2cbf"; ctxJardin.beginPath(); ctxJardin.moveTo(tipX,tipY-32); ctxJardin.lineTo(tipX-9,tipY-2); ctxJardin.lineTo(tipX+9,tipY-2); ctxJardin.closePath(); ctxJardin.fill(); }
+    else if(tipo===4){ ctxJardin.fillStyle="#5c4033"; ctxJardin.fillRect(tipX-3,tipY,6,25); ctxJardin.fillStyle="#ff5d8f"; ctxJardin.beginPath(); ctxJardin.arc(tipX,tipY-6,14,0,Math.PI*2); ctxJardin.fill(); }
+    else if(tipo===5){ ctxJardin.strokeStyle="#2e7d32"; ctxJardin.lineWidth=2.5; ctxJardin.beginPath(); ctxJardin.moveTo(fx,fy+45); ctxJardin.lineTo(tipX,tipY); ctxJardin.stroke(); ctxJardin.fillStyle="#ff8fab"; ctxJardin.beginPath(); ctxJardin.arc(tipX,tipY-4,7,0,Math.PI*2); ctxJardin.fill(); ctxJardin.fillStyle="#fff"; ctxJardin.beginPath(); ctxJardin.arc(tipX,tipY-4,3,0,Math.PI*2); ctxJardin.fill(); }
+    else { ctxJardin.strokeStyle="#2e7d32"; ctxJardin.lineWidth=2.5; ctxJardin.beginPath(); ctxJardin.moveTo(fx,fy+45); ctxJardin.lineTo(tipX,tipY); ctxJardin.stroke(); ctxJardin.fillStyle="#ff4d6d"; for(let s=0;s<4;s++){ const sa=s*Math.PI/2; ctxJardin.beginPath(); ctxJardin.arc(tipX+Math.cos(sa)*6,tipY+Math.sin(sa)*6,4.5,0,Math.PI*2); ctxJardin.fill(); } }
+  }
+  ctxJardin.fillStyle=esNoche?"rgba(200,180,255,0.85)":"rgba(255,143,171,0.85)";
+  mainPetals.forEach(p=>{ p.y+=p.speedY; p.x+=Math.sin(windTime+p.angle)*p.speedX; if(p.y>h){ p.y=-10; p.x=Math.random()*w; } if(p.x>w) p.x=0; ctxJardin.beginPath(); ctxJardin.arc(p.x,p.y,p.r,0,Math.PI*2); ctxJardin.fill(); });
+  requestAnimationFrame(drawMainGardenScene);
+}
+drawMainGardenScene();
+function spawnAnimatedLife(containerId){ const container=document.getElementById(containerId); if(!container) return; container.innerHTML=""; const b=document.createElement("div"); b.className="animal-animado"; b.textContent="🦋"; b.style.animation="flyButterfly1 14s linear infinite"; container.appendChild(b); const bee=document.createElement("div"); bee.className="animal-animado"; bee.textContent="🐱"; bee.style.animation="flyBee1 10s linear infinite"; container.appendChild(bee); const firefly=document.createElement("div"); firefly.className="animal-animado"; firefly.textContent="⭐"; firefly.style.animation="fireflyFloat 8s ease-in-out infinite"; container.appendChild(firefly); }
+const modalCarta=document.getElementById("modalCarta"); const modalRecuerdo=document.getElementById("modalRecuerdo");
+let ramoSeleccionado=[]; let floresSembradas=0;
+function actualizarBarRamo(){ const bar=document.getElementById("ramoBar"); const texto=document.getElementById("ramoTexto"); const btnLimpiar=document.getElementById("btnLimpiarRamo"); if(ramoSeleccionado.length===0){ bar.classList.remove('visible'); btnLimpiar.style.display='none'; return; } bar.classList.add('visible'); btnLimpiar.style.display='block'; texto.textContent=`🤍 ${ramoSeleccionado.length} seleccionados`; }
+function mostrarRamoCompleto(){ const textos=ramoSeleccionado.map(i=>`• ${FLORES_INFO[i].emoji} ${FLORES_INFO[i].nombre}: ${FLORES_INFO[i].mensaje}`).join('\n\n'); const totalEmojis=ramoSeleccionado.map(i=>FLORES_INFO[i].emoji).join(''); document.getElementById("recuerdoIcono").textContent=totalEmojis||'🤍'; document.getElementById("recuerdoNombre").textContent=`SELECCIÓN DE ${ramoSeleccionado.length} FLORES • PARA GABI`; document.getElementById("recuerdoTexto").textContent=`Gabi, aquí tienes las flores que tocaste:\n\n${textos}\n\nNota de hoy: ${getNotaHoy()}\n\nCon cariño,\nTonycito 🤍`; modalRecuerdo.classList.add('visible'); }
+function mostrarRecuerdo(n){ const info=FLORES_INFO[n%FLORES_INFO.length]; document.getElementById("recuerdoIcono").textContent=info.emoji; document.getElementById("recuerdoNombre").textContent=`${info.nombre.toUpperCase()} • ${info.desc}`; document.getElementById("recuerdoTexto").textContent=info.mensaje; modalRecuerdo.classList.add('visible'); }
+function abrirPanorama(){ panoramaJardin.classList.add('visible'); document.body.style.overflow='hidden'; irAMundo(0); spawnAnimatedLife('vida1'); spawnAnimatedLife('vida2'); }
+let mundoActual=0; const totalMundos=2;
+function irAMundo(n){ if(n<0) n=totalMundos-1; if(n>=totalMundos) n=0; mundoActual=n; track.style.transform=`translateX(-${mundoActual*50}%)`; document.querySelectorAll(".dot").forEach((d,i)=>d.classList.toggle("activo",i===mundoActual)); }
+let startX=0, currentX=0, isDragging=false, startTime=0, seMovio=false;
+function inicioArrastre(x){ startX=x; currentX=x; isDragging=true; startTime=Date.now(); track.style.transition='none'; }
+function movimientoArrastre(x){ if(!isDragging) return; currentX=x; const diff=currentX-startX; if(Math.abs(diff)<5) return; const base=-mundoActual*viewport.offsetWidth; track.style.transform=`translateX(${base+diff}px)`; }
+function finArrastre(){ if(!isDragging) return; isDragging=false; track.style.transition='transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94)'; const diff=currentX-startX; const elapsed=Date.now()-startTime; if(Math.abs(diff)>60 && elapsed<800){ if(diff<0) irAMundo(mundoActual+1); else irAMundo(mundoActual-1); } else { irAMundo(mundoActual); } }
+viewport.addEventListener('touchstart', e=>{ seMovio=false; inicioArrastre(e.touches[0].clientX); }, {passive:true});
+viewport.addEventListener('touchmove', e=>{ movimientoArrastre(e.touches[0].clientX); if(Math.abs(currentX-startX)>10) seMovio=true; }, {passive:true});
+viewport.addEventListener('touchend', finArrastre);
+viewport.addEventListener('mousedown', e=>{ if(e.target.closest('.flecha-pc')||e.target.closest('#ramoBar')||e.target.closest('.indicadores')) return; seMovio=false; e.preventDefault(); inicioArrastre(e.clientX); });
+window.addEventListener('mousemove', e=>{ movimientoArrastre(e.clientX); if(isDragging && Math.abs(currentX-startX)>10) seMovio=true; });
+window.addEventListener('mouseup', finArrastre);
+document.getElementById('flechaIzq').addEventListener('click', e=>{ e.stopPropagation(); irAMundo(mundoActual-1); });
+document.getElementById('flechaDer').addEventListener('click', e=>{ e.stopPropagation(); irAMundo(mundoActual+1); });
+document.querySelectorAll('.dot').forEach((d,i)=>{ d.addEventListener('click', e=>{ e.stopPropagation(); irAMundo(i); }); });
+document.querySelectorAll('.zona-limpia').forEach(flor=>{ flor.addEventListener('click', e=>{ if(seMovio) return; e.stopPropagation(); const n=parseInt(flor.dataset.flor); flor.classList.remove('flash'); void flor.offsetWidth; flor.classList.add('flash'); setTimeout(()=>flor.classList.remove('flash'),600); const idx=ramoSeleccionado.indexOf(n); if(idx>-1){ ramoSeleccionado.splice(idx,1); } else { ramoSeleccionado.push(n); mostrarRecuerdo(n); } actualizarBarRamo(); }); });
+document.getElementById("btnVerRamo").addEventListener('click', mostrarRamoCompleto);
+document.getElementById("btnLimpiarRamo").addEventListener('click', ()=>{ ramoSeleccionado=[]; actualizarBarRamo(); });
+document.getElementById("cerrarPanorama").addEventListener('click', ()=>{ panoramaJardin.classList.remove('visible'); document.body.style.overflow='auto'; });
+jardinSeccion.addEventListener('click', abrirPanorama);
+document.getElementById("abrirCarta").addEventListener('click', ()=>{ document.getElementById("textoCarta").textContent=getCartaFinal(); modalCarta.classList.add('visible'); });
+document.getElementById("cerrarCarta").addEventListener('click', ()=>modalCarta.classList.remove('visible'));
+document.getElementById("finalizarCarta").addEventListener('click', ()=>modalCarta.classList.remove('visible'));
+document.getElementById("cerrarRecuerdo").addEventListener('click', ()=>modalRecuerdo.classList.remove('visible'));
+document.getElementById("btnCerrarRecuerdo2").addEventListener('click', ()=>modalRecuerdo.classList.remove('visible'));
+document.getElementById("btnSembrar").addEventListener('click', ()=>{ floresSembradas++; document.getElementById("textoSembradas").textContent=`Has sembrado ${floresSembradas} jazmines 🤍 ¡Tu jardín crece!`; const p=document.createElement("div"); p.textContent=["🤍","🌸","💜","🌷","✨"][Math.floor(Math.random()*5)]; p.style.position='fixed'; p.style.left=(20+Math.random()*60)+'%'; p.style.top='70%'; p.style.fontSize='32px'; p.style.pointerEvents='none'; p.style.transition='all 1.2s ease'; p.style.zIndex='99'; document.body.appendChild(p); setTimeout(()=>{ p.style.top='30%'; p.style.transform='rotate(360deg) scale(1.2)'; p.style.opacity='0'; },50); setTimeout(()=>p.remove(),1300); });
+btnEntrar.addEventListener('click', ()=>{ pantallaInicio.classList.add('oculta'); document.body.style.overflow='auto'; actualizarChips(); mostrarNotaHoy(); musica.src=NOMBRE_CANCION; });
+btnMusica.addEventListener('click', ()=>{ if(musica.paused){ musica.src=NOMBRE_CANCION; musica.volume=0.3; musica.play(); btnMusica.textContent='🎵'; } else { musica.pause(); btnMusica.textContent='🔇'; } });
+setInterval(()=>{ const p=document.createElement("div"); p.className="particula"; p.style.setProperty('--left', Math.random()*100+'vw'); p.style.setProperty('--size', (12+Math.random()*16)+'px'); p.style.setProperty('--duration', (7+Math.random()*6)+'s'); p.textContent=SIMBOLOS[Math.floor(Math.random()*SIMBOLOS.length)]; efectos.appendChild(p); setTimeout(()=>p.remove(),13000); },900);
+actualizarChips(); mostrarNotaHoy();
+</script>
+</body>
+</html>
